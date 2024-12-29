@@ -51,8 +51,24 @@ function patchKeyedChildren(n1, n2, container) {
 
     const oldStart = j;
     const newStart = j;
+    // 构建索引表
+    const keyIndex: {
+      [key: string]: number;
+    } = {};
+    for (let i = newStart; i <= newEnd; i++) {
+      keyIndex[newChildren[i].key] = i;
+    }
     for (let i = oldStart; i < oldEnd; i++) {
       const oldVNode = oldChildren[i];
+
+      const k = keyIndex[oldVNode.key];
+      if (typeof k !== "undefined") {
+        newVNode = newChildren[k];
+        patch(oldVNode, newVNode, container);
+        source[k - newStart] = i;
+      } else {
+        unmount(oldVNode);
+      }
 
       for (let k = newStart; k < newEnd; k++) {
         const newVNode = newChildren[k];
