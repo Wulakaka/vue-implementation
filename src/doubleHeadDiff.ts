@@ -25,7 +25,12 @@ function patchKeyedChildren(n1, n2, container) {
   let newEndVNode = newChildren[newEndIdx];
 
   while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
-    if (oldStartVNode.key === newStartVNode.key) {
+    // 增加两个判断分支，如果头尾部的节点为 undefined，则说明已经被处理过，直接跳到下一个位置
+    if (!oldStartVNode) {
+      oldStartVNode = oldChildren[++oldStartIdx];
+    } else if (!oldEndVNode) {
+      oldEndVNode = oldChildren[--oldEndIdx];
+    } else if (oldStartVNode.key === newStartVNode.key) {
       // 步骤一：oldStartVNode 和 newStartVNode 比较
       patch(oldStartVNode, newStartVNode, container);
       // 更新索引值，并指向下一个位置
@@ -57,6 +62,23 @@ function patchKeyedChildren(n1, n2, container) {
       // 更新索引值，并指向下一个位置
       oldEndVNode = oldChildren[--oldEndIdx];
       newStartVNode = newChildren[++newStartIdx];
+    } else {
+      // 遍历旧的一组子节点，试图寻找与 newStartVNode.key 相同的节点
+      // idxInOld 就是新的一组子节点的头部节点在旧的一组子节点中的索引值
+      const idxInOld = oldChildren.findIndex(
+        (node) => node.key === newStartVNode.key,
+      );
+      // idxInOld 大于 0，说明找到了可以复用的节点，并且需要将其对应的真实 DOM 移动到头部
+      if (idxInOld > 0) {
+        const vNodeToMove = oldChildren[idxInOld];
+        patch(vNodeToMove, newStartVNode, container);
+        // 将 vNodeToMove.el 移动到 oldStartVNode.el 之前
+        insert(vNodeToMove.el, container, oldStartVNode.el);
+        // 由于位置 idxInOld 处的节点所对应的真实 DOM 已经移动到别处，因此将其置为 undefined
+        oldChildren[idxInOld] = undefined;
+        // 最后更新索引值，并指向下一个位置
+        newStartVNode = newChildren[++newStartIdx];
+      }
     }
   }
 }
