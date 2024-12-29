@@ -76,9 +76,13 @@ function patchKeyedChildren(n1, n2, container) {
         insert(vNodeToMove.el, container, oldStartVNode.el);
         // 由于位置 idxInOld 处的节点所对应的真实 DOM 已经移动到别处，因此将其置为 undefined
         oldChildren[idxInOld] = undefined;
-        // 最后更新索引值，并指向下一个位置
-        newStartVNode = newChildren[++newStartIdx];
+      } else {
+        // 将 newStartVNode.el 插入到 oldStartVNode.el 之前
+        patch(null, newStartVNode, container, oldStartVNode.el);
       }
+
+      // 最后更新索引值，并指向下一个位置
+      newStartVNode = newChildren[++newStartIdx];
     }
   }
 }
