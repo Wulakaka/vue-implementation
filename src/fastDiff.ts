@@ -42,5 +42,27 @@ function patchKeyedChildren(n1, n2, container) {
     while (j <= oldEnd) {
       unmount(oldChildren[j++]);
     }
+  } else {
+    // 构造 source 数组, 用于存储新的一组子节点中每个节点在旧的一组子节点中的位置
+    // 新的一组子节点中剩余未处理节点的数量
+    const count = newEnd - j + 1;
+    const source = new Array(count);
+    source.fill(-1);
+
+    const oldStart = j;
+    const newStart = j;
+    for (let i = oldStart; i < oldEnd; i++) {
+      const oldVNode = oldChildren[i];
+
+      for (let k = newStart; k < newEnd; k++) {
+        const newVNode = newChildren[k];
+
+        if (oldVNode.key === newVNode.key) {
+          patch(oldVNode, newVNode, container);
+          source[k - newStart] = i;
+          break;
+        }
+      }
+    }
   }
 }
