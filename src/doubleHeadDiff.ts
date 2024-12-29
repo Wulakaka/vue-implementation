@@ -92,5 +92,10 @@ function patchKeyedChildren(n1, n2, container) {
     for (let i = newStartIdx; i <= newEndIdx; i++) {
       patch(null, newChildren[i], container, oldStartVNode.el);
     }
+  } else if (newEndIdx < newStartIdx && oldEndIdx >= oldStartIdx) {
+    // 说明有旧节点遗漏
+    for (let i = oldStartIdx; i <= oldEndIdx; i++) {
+      unmount(oldChildren[i]);
+    }
   }
 }
