@@ -85,4 +85,12 @@ function patchKeyedChildren(n1, n2, container) {
       newStartVNode = newChildren[++newStartIdx];
     }
   }
+
+  // 循环结束后检查索引值情况
+  if (oldEndIdx < oldStartIdx && newEndIdx >= newStartIdx) {
+    // 说明有新节点遗漏
+    for (let i = newStartIdx; i <= newEndIdx; i++) {
+      patch(null, newChildren[i], container, oldStartVNode.el);
+    }
+  }
 }
